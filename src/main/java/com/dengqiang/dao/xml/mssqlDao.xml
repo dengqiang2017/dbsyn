@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- xml文件 -->
+<mapper namespace="com.dengqiang.dao.mssql.IMssqlDAO">
+	<!-- <cache/> -->
+	
+<!-- 	xtype:U用户表；V视图；P存储过程 -->
+	<select id="getAllTableName" parameterType="String" resultType="hashMap"> 
+		select id,name from sysobjects 
+ 			where xtype='U' 
+		<![CDATA[ 
+ 			and name<>'dtproperties' 
+ 		]]> 
+ 		<if test="tableName!=null">
+ 		and name like #{tableName}
+ 		</if>	
+ 			order by name 
+ 	</select>
+ 	
+ 	<select id="getTableStructure" parameterType="String" resultType="hashMap">
+	   select sys.columns.name as column_name, sys.types.name as type_name, sys.columns.max_length, sys.columns.is_nullable, 
+	  (select count(*) from sys.identity_columns where sys.identity_columns.object_id = sys.columns.object_id and sys.columns.column_id = sys.identity_columns.column_id) as is_identity ,
+	  (select value from sys.extended_properties where sys.extended_properties.major_id = sys.columns.object_id and sys.extended_properties.minor_id = sys.columns.column_id) as description
+	  from sys.columns, sys.tables, sys.types where sys.columns.object_id = sys.tables.object_id and sys.columns.system_type_id=sys.types.system_type_id 
+	and sys.tables.name=#{tableName} 
+	and sys.types.name not in('T_depttype','clerkType','deptType','sortType',
+	'T_sorttype','T_clerktype','sysname')
+	order by sys.columns.column_id
+ 	</select>
+ 	
+ 	<select id="getDataByTableName" parameterType="hashMap" resultType="hashMap">
+ 	select * from ${tableName}
+ 	<if test="${com_id!=null}">
+ 	where  ltrim(rtrim(isnull(com_id)))=#{com_id} 
+ 	</if>
+ 	</select>
+ 	
+ 	<select id="getTableData" parameterType="Object" resultType="hashMap">
+ 	select top ${rows} * from ${tableName}
+ 	</select>
+ 	
+</mapper>

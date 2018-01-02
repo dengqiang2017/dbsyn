@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- xml文件 -->
+<mapper namespace="com.dengqiang.dao.mysql.IMysqlDAO">
+	<!-- <cache/> -->
+	
+	<select id="createTable" parameterType="hashMap" resultType="hashMap"> 
+		 CREATE TABLE if not exists ${tableName} (
+ 		<foreach collection="filedList" index="index" item="item" separator=",">
+	 		<choose>
+	 		<when test="item.column_name=='seeds_id'">seeds_id int NOT NULL AUTO_INCREMENT</when>
+	 		<when test="item.column_name=='id'">id int NOT NULL AUTO_INCREMENT</when>
+	 		<when test="item.column_name=='ID'">ID int NOT NULL AUTO_INCREMENT</when>
+	 		<otherwise>
+	 		${item.column_name} 
+	 		<if test="item.type_name=='nvarchar'">
+	 		varchar
+	 		</if>
+	 		<if test="item.type_name!='nvarchar'">
+	 		${item.type_name}
+	 		</if>
+	 		<if test="item.type_name!='datetime'">
+	 		(${item.max_length}) 
+	 		</if>
+	 		<if test="item.is_nullable==0">NOT</if> NULL
+	 		</otherwise>
+	 		</choose>
+ 		</foreach>
+ 		<foreach collection="filedList" index="index" item="item">
+	 		<choose>
+	 		<when test="item.column_name=='seeds_id'">,PRIMARY KEY (seeds_id)</when>
+	 		<when test="item.column_name=='id'">,PRIMARY KEY (id)</when>
+	 		<when test="item.column_name=='ID'">,PRIMARY KEY (ID)</when>
+	 		</choose>
+ 		</foreach>
+	)
+	ENGINE=InnoDB
+	DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci
+	AUTO_INCREMENT=1
+	ROW_FORMAT=DYNAMIC ;
+ 	</select>
+	<insert id="insert" parameterType="hashMap">
+		${sql}
+	</insert>
+	
+	<select id="getAllTableName" parameterType="String" resultType="hashMap">
+	  SELECT table_name, table_type, engine
+	  FROM information_schema.tables
+	  WHERE table_schema = 'o2o'
+ 	 <if test="tableName!=null">
+ 		and table_name like #{tableName}
+ 		</if>
+  	ORDER BY table_name;
+	</select>
+<select id="getTableStructure" parameterType="String" resultType="hashMap">
+ use information_schema;   
+select column_name,is_nullable,data_type,column_type,character_maximum_length,column_key from columns  where table_name=#{tableName};   
+use o2o;
+</select>
+</mapper>

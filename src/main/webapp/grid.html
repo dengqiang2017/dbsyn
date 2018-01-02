@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1,maximum-scale=1.0,user-scalable=no">
+<title>长表格</title>
+<!-- <link rel="stylesheet" type="text/css" href="https://v3.bootcss.com/dist/css/bootstrap.min.css"> -->
+<link rel="stylesheet" type="text/css" href="jqgrid/css/ui.jqgrid.css">
+<!-- <link rel="stylesheet" type="text/css" href="jqgrid/css/css/start/jquery-ui-1.8.16.custom.css"> -->
+<!-- <link rel="stylesheet" type="text/css" href="jqgrid/css/css/hot-sneaks/jquery-ui-1.8.16.custom.css"> -->
+<!-- <link rel="stylesheet" type="text/css" href="jqgrid/css/css/flick/jquery-ui-1.8.16.custom.css"> -->
+<!-- <link rel="stylesheet" type="text/css" href="jqgrid/css/css/cupertino/jquery-ui-1.8.16.custom.css"> -->
+<link rel="stylesheet" type="text/css" href="jqgrid/css/css/redmond/jquery-ui-1.8.16.custom.css">
+<!-- <link rel="stylesheet" type="text/css" href="jqgrid/css/css/ui-lightness/jquery-ui-1.8.16.custom.css"> -->
+<script type="text/javascript" src="http://www.pulledup.cn/js_lib/jquery.11.js"></script>
+<!--  <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+ <script src="jqgrid/js/jquery.jqGrid.src.js"></script>
+ <script src="jqgrid/js/i18n/grid.locale-cn.js"></script>
+ <style type="text/css">
+/*  html,body{   margin: 0;   */
+/*     padding: 0;   */
+/*     font-size: 16px;  } */
+ #page input,#page span,#page select{font-size: 16px !important;}
+ #page input,#page select{height: 30px;}
+ .ui-icon{width: 45px;height: 30px;text-indent:0;line-height: 30px;}
+ .ui-jqgrid input{font-size: 16px;}
+ </style>
+</head>
+<body> 
+<table id="grid" style="height: 200px;font-size: 14px;"></table>
+<div id="page" style="font-size: 16px;height: 40px;"></div>
+<div style="height: 100px;"></div>
+<script type="text/javascript">
+	            var lastsel2="";
+	            $("#grid").jqGrid({
+	                autowidth:true,
+	                url:"mssql/getTableDataByPage.do?tableName=ARd02051",
+	                datatype: "json",
+	                height:'100%',
+	            	colNames : ["seeds_id","com_id","finacial_y","finacial_m","recieved_auto_id","recieved_id","rejg_auto_no"
+	            	            ,"rejg_hw_no","finacial_d","customer_id","dept_id","clerk_id","recieved_direct","type_sum","comfirm_flag","sum_si"],
+	                colModel:[
+	          	            {name : 'seeds_id',index : 'seeds_id',sortable:true, width:"100px", editable : true,edittype : "button",editoptions : {id : "upload",value:"保存"}},// 
+	        	            {name : 'com_id',index : 'com_id',width:"100px"}, //
+	        	            {name : 'finacial_y',index : 'finacial_y', width:"200px",editable : true}, 
+	        	            {name : 'finacial_m',index : 'finacial_m', width:"200px",editable : true,edittype : "button",editoptions : {id : "upload",value:"上传"}}, 
+	        	            {name : 'recieved_auto_id',index : 'recieved_auto_id', width:"200px",formatter :function(cellvalue, options, rowObject){
+// 	        	            	console.log(options);
+// 	        	            	console.log(rowObject);
+	        	            	return cellvalue+"<button type='button' onclick='showImg(\""+cellvalue+"\");'>看图</button>";
+	        	            }}, 
+	        	            {name : 'recieved_id',index : 'recieved_id', width:"200px"}, 
+	        	            {name : 'rejg_auto_no',index : 'rejg_auto_no', width:"200px"}, 
+	        	            {name : 'rejg_hw_no',index : 'rejg_hw_no', width:"200px"}, 
+	        	            {name : 'finacial_d',index : 'finacial_d', width:"200px"}, 
+	        	            {name : 'customer_id',index : 'customer_id', width:"200px"}, 
+	        	            {name : 'dept_id',index : 'dept_id', width:"200px"}, 
+	        	            {name : 'clerk_id',index : 'clerk_id', width:"200px"}, 
+	        	            {name : 'recieved_direct',index : 'recieved_direct', width:"200px"}, 
+	        	            {name : 'type_sum',index : 'type_sum', width:"200px"}, 
+	        	            {name : 'comfirm_flag',index : 'comfirm_flag', width:"200px"}, 
+	        	            {name : 'sum_si',index : 'sum_si', width:"200px"}
+	                ],
+	                rowNum:20,
+	                sortname:"itemid",
+	                sortorder:"desc",
+	                height:"300px",
+					shrinkToFit:false,
+		            autowidth:true,
+		            rownumbers: true,
+		            rowList : [ 10, 20, 30 ],
+	                
+	                pager:"#page",
+	                jsonReader : {
+	                    repeatitems:false,
+	                    id:"seeds_id"
+	                },
+	                editurl : "/RowEditing",
+	                  shrinkToFit: false,
+	                onSelectRow : function(id) {
+	                    if (id && id !== lastsel2) {
+	                      $("#grid").jqGrid("restoreRow", lastsel2);
+	                      $("#grid").jqGrid("editRow", id, true);
+	                      lastsel2 = id;
+	                      $("input[name='finacial_m']").click(function(){
+	                    	  alert(1);
+	                      });
+	                    }
+	                  },
+	                gridComplete : function() {
+	                	$("#next_page span").html("下一页");
+	                	$("#next_page span").css("background-image","none");
+	                	$("#last_page span").html("尾页");
+	                	$("#last_page span").css("background-image","none");
+	                	
+	                	$("#prev_page span").html("上一页");
+	                	$("#prev_page span").css("background-image","none");
+	                	
+	                	$("#first_page span").html("首页");
+	                	$("#first_page span").css("background-image","none");
+	                	
+	                },
+	                viewrecords: false,
+	                caption: null
+	            });
+	            jQuery("#grid").jqGrid("navButtonAdd", "#page", {
+	            	     caption:"Add",   
+	            	     buttonicon:"ui-icon-add",   
+	            	     onClickButton: function(){   
+	            	       alert("Adding Row");  
+	            	     },   
+	            	     position:"last"  
+	            	  });
+	            //实现２行表头脚本
+	            $("#grid").jqGrid('setGroupHeaders', {
+	                useColSpanStyle: false,
+	                groupHeaders:[
+	                    {startColumnName:'com_id', numberOfColumns:2, titleText: "<div style='text-align:center'>商品介绍</div>"},
+	                    {startColumnName:'recieved_auto_id', numberOfColumns: 2, titleText: "<div style='text-align:center'>商品属性</div>",align:"center"} 
+	                ] 
+	            });    
+//               $("#grid").jqGrid('setFrozenColumns');
+	            
+	            function showImg(event){
+	            	alert(event);
+	            }
+</script>
+</body>
+</html>

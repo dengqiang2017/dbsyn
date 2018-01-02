@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1,maximum-scale=1.0,user-scalable=no">
+<title>easyUI表格</title>
+<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+<script type="text/javascript" src="http://www.pulledup.cn/js_lib/jquery.11.js"></script>
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+</head>
+<body>
+<table  id="dg1" class="easyui-datagrid" style="width:700px;height:250px"
+			data-options="rownumbers:true,singleSelect:true,url:'datagrid_data1.json',method:'get',onClickCell: onClickCell">
+		<thead>
+			<tr>
+				<th data-options="field:'itemid',width:80" rowspan="2">Item ID</th>
+				<th data-options="field:'productid',width:100" rowspan="2">Product</th>
+				<th colspan="4">Item Details</th>
+			</tr>
+			<tr>
+				<th data-options="field:'listprice',width:80,align:'right'">List Price</th>
+				<th data-options="field:'unitcost',width:80,align:'right'">Unit Cost</th>
+				<th data-options="field:'attr1',width:240">Attribute</th>
+				<th data-options="field:'status',width:60,align:'center'">Status</th>
+			</tr>
+		</thead>
+	</table>
+	<table id="dg" class="easyui-datagrid"  style="width:700px;height:auto"
+			data-options="
+				iconCls: 'icon-edit',
+				singleSelect: true,
+				url: 'datagrid_data1.json',
+				method:'get',
+				onClickCell: onClickCell
+			">
+		<thead>
+			<tr>
+				<th data-options="field:'itemid',width:80">Item ID</th>
+				<th data-options="field:'productid',width:100,editor:'text'">Product</th>
+				<th data-options="field:'listprice',width:80,align:'right',editor:{type:'numberbox',options:{precision:1}}">List Price</th>
+				<th data-options="field:'unitcost',width:80,align:'right',editor:'numberbox'">Unit Cost</th>
+				<th data-options="field:'attr1',width:250,editor:'text'">Attribute</th>
+				<th data-options="field:'status',width:60,align:'center',editor:{type:'checkbox',options:{on:'P',off:''}}">Status</th>
+			</tr>
+		</thead>
+	</table>
+	<script type="text/javascript">
+		$.extend($.fn.datagrid.methods, {
+			editCell: function(jq,param){
+				return jq.each(function(){
+					var opts = $(this).datagrid('options');
+					var fields = $(this).datagrid('getColumnFields',true).concat($(this).datagrid('getColumnFields'));
+					for(var i=0; i<fields.length; i++){
+						var col = $(this).datagrid('getColumnOption', fields[i]);
+						col.editor1 = col.editor;
+						if (fields[i] != param.field){
+							col.editor = null;
+						}
+					}
+					$(this).datagrid('beginEdit', param.index);
+					for(var i=0; i<fields.length; i++){
+						var col = $(this).datagrid('getColumnOption', fields[i]);
+						col.editor = col.editor1;
+					}
+				});
+			}
+		});
+		var editIndex = undefined;
+		function endEditing(){
+			if (editIndex == undefined){return true;}
+			if ($('#dg').datagrid('validateRow', editIndex)){
+				$('#dg').datagrid('endEdit', editIndex);
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function onClickCell(index, field){
+			if (endEditing()){
+				$('#dg').datagrid('selectRow', index)
+						.datagrid('editCell', {index:index,field:field});
+				editIndex = index;
+			}
+		}
+	</script>
+</body>
+</html>

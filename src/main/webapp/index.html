@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>数据库同步</title>
+<link rel="stylesheet" type="text/css" href="http://www.pulledup.cn/css/popUpBox.css">
+<link rel="stylesheet" type="text/css" href="https://v3.bootcss.com/dist/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="jqgrid/css/css/ui-lightness/jquery-ui-1.8.16.custom.css">
+<link rel="stylesheet" type="text/css" href="jqgrid/css/ui.jqgrid.css">
+<script type="text/javascript" src="http://www.pulledup.cn/js_lib/jquery.11.js"></script>
+<script type="text/javascript" src="http://www.pulledup.cn/js/popUpBox.js"></script>
+ <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ <script src="jqgrid/js/jquery.jqGrid.src.js"></script>
+ <script src="jqgrid/js/i18n/grid.locale-cn.js"></script>
+<style type="text/css">
+#mssqlList,#mysqlList{
+line-height: 25px;
+height:300px;
+width: 100%;
+overflow-y:auto;
+border: 1px solid #ccc;
+
+}
+#mssqlList>li,#mysqlList>li{cursor: pointer;list-style-type: none;margin-left: -38px;}
+.select{background-color: red !important;color: white;}
+.col-md-6{border: 1px solid #ccc;}
+
+</style>
+</head>
+<body>
+	<div class="col-md-6" style="border: 1px solid #ccc;height: 100%;">
+		<h2>sqlserver</h2>
+		<div class="col-md-6">
+			<h3>表名称</h3>
+			<div>
+			    <div>
+					<input type="text" id="find" class="form-control"
+						style="width: auto;" placeholder="输入表名查找">
+				</div>
+				<ul id="mssqlList"></ul>
+				<div>
+					<label><input type="checkbox" id="all">全选</label>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6" id="mssqlStructure">
+		</div>
+		<div class="col-md-12" id="dataTable" style="height: 100%;">
+		</div>
+	</div>
+	<div class="col-md-6" style="border: 1px solid #ccc;height: 100%;">
+		<h2>mysql</h2>
+		<div class="col-md-6">
+			<h3>表名称</h3>
+			<div>
+			    <div>
+					<input type="text"  id="findMysql" class="form-control"
+						style="width: auto;" placeholder="输入表名查找">
+				</div>
+				<ul id="mysqlList"></ul>
+				<div>
+					<label><input type="checkbox" id="allmysql">全选</label>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6" id="mysqlStructure">
+		</div>
+	</div>
+  
+	<nav class="navbar navbar-default navbar-fixed-bottom">
+  <div class="container">
+   <button type="button" class="btn btn-info" id="syn">同步数据表结构到mysql</button>
+   <button type="button" class="btn btn-info" id="synData">同步表数据到mysql</button>
+			<button type="button" class="btn btn-info" id="clearTable">清除数据</button>
+  </div>
+</nav>
+	<script type="text/javascript" src="index.js"></script>
+</body>
+</html>
