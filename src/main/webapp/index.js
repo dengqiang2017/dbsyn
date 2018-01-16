@@ -107,6 +107,8 @@ $("#syn").click(function(){
 		}
 	});
 });
+var insertInfo;
+var itemhtml=$("#syndata").html();
 $("#synData").click(function(){
 	var checks=$(".check:checked");
 	var tableName="";
@@ -120,7 +122,25 @@ $("#synData").click(function(){
 	},function(data){
 		pop_up_box.loadWaitClose();
 		if(data.success){
-			pop_up_box.showMsg("创建成功!");
+//			pop_up_box.showMsg("创建成功!");
+			insertInfo=setInterval(function(){
+				$.get("mysql/getInsertInfo.do",function(data){
+					if(data&&data.length>0){
+						$("#syndata").html("");
+						for (var i = 0; i < data.length; i++) {
+							var json=data[i];
+							var item=$(itemhtml);
+							$("#syndata").append(item);
+							item.find(".tableName").html(json.tableName);
+							item.find(".countNum").html(json.countNum);
+							item.find(".insertNum").html(json.insertNum);
+							item.find(".msg").html(json.msg);
+						}
+					}else{
+						clearInterval(insertInfo);
+					}
+				});
+			},500);
 		}else{
 			pop_up_box.showMsg(data.msg);
 		}
@@ -132,7 +152,7 @@ $("#findMysql").click(function(){
 	loadMysqlData(tableName);
 });
 loadMysqlData();
-function loadMysqlData(tableName){ 
+function loadMysqlData(tableName){
 	if(!tableName){
 		tableName="";
 	}

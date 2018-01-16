@@ -1,5 +1,8 @@
 package com.dengqiang.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,5 +76,25 @@ public abstract class BaseController {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .getRequestAttributes()).getRequest();
 		return request;
-	} 
+	}
+	/**
+	 * 保存数据到文件中
+	 * @param file 文件存储路径
+	 * @param str 存储数据
+	 */
+	public synchronized void saveFile(File file,String str){
+			try {
+				if (!file.getParentFile().exists()) {
+					file.getParentFile().mkdirs();
+				}
+				OutputStreamWriter outputStream = new OutputStreamWriter(
+						new FileOutputStream(file),
+						"UTF-8");
+				outputStream.write(str);
+				outputStream.flush();
+				outputStream.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	}
 }

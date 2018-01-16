@@ -3,6 +3,8 @@ package com.dengqiang.service;
 import java.util.List;
 import java.util.Map;
 
+import com.dengqiang.controller.SynDataBean;
+
 public interface IMysqlService {
 	/**
 	 * 创建表
@@ -16,10 +18,11 @@ public interface IMysqlService {
 	 * @param tableName 表名称
 	 * @param filedList 字段名称
 	 * @param list 数据集
+	 * @param bean 
 	 * @return
 	 */
 	String insertList(String tableName, List<Map<String, Object>> filedList,
-			List<Map<String, Object>> list);
+			List<Map<String, Object>> list, SynDataBean bean);
 	/**
 	 * 获取所有用户表
 	 * @param tableName

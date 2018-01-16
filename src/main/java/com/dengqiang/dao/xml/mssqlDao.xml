@@ -32,7 +32,7 @@
  	
  	<select id="getDataByTableName" parameterType="hashMap" resultType="hashMap">
  	select * from ${tableName}
- 	<if test="${com_id!=null}">
+ 	<if test="com_id!=null">
  	where  ltrim(rtrim(isnull(com_id)))=#{com_id} 
  	</if>
  	</select>

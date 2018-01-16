@@ -1,11 +1,15 @@
 package com.dengqiang.controller;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
+import net.sf.json.JSONArray;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -107,18 +111,13 @@ public class MysqlController extends BaseController{
 		boolean success=false;
 		try {
 			if (StringUtils.isNotBlank(tableName)) {
-				String[] tableNames=tableName.split(",");
 				Map<String, Object> map=getKeyAndValue(request);
-				for (int i = 0; i < tableNames.length; i++) {
-					map.put("tableName", tableNames[i]);
-					List<Map<String, Object>> list=mssqlService.getDataByTableName(map);
-					List<Map<String, Object>> filedList=mssqlService.getTableStructure( tableNames[i]);
-					Map<String, Object> param=new HashMap<String, Object>();
-					param.put("filedList", filedList);
-					param.put("list", list);
-					param.put("tableName", tableNames[i]);
-					msg=mysqlService.insertList(tableNames[i],filedList,list);
-				}
+				SynDataThread th=new SynDataThread(tableName);
+				th.setMap(map);
+				th.setMssqlService(mssqlService);
+				th.setMysqlService(mysqlService);
+				th.setRequest(request.getSession());
+				th.start();
 				success=true;
 			}else{
 				msg="没有获取到数据表名称";
@@ -128,6 +127,17 @@ public class MysqlController extends BaseController{
 			e.printStackTrace();
 		}
 		return new ResultInfo(success, msg);
+	}
+	
+	/**
+	 * 获取数据插入信息
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("getInsertInfo")
+	@ResponseBody
+	public Object getInsertInfo(HttpServletRequest request) {
+		return request.getSession().getAttribute("beans");
 	}
 	/**
 	 * 

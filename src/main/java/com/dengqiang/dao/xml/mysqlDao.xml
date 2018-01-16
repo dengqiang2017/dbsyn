@@ -59,4 +59,7 @@
 select column_name,is_nullable,data_type,column_type,character_maximum_length,column_key from columns  where table_name=#{tableName};   
 use o2o;
 </select>
+<select id="getCount" parameterType="String" resultType="Integer">
+select count(*) from ${tableName}
+</select>
 </mapper>

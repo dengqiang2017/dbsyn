@@ -15,11 +15,12 @@ public interface IMysqlDAO {
 	Integer createTable(Map<String, Object> map);
 	/**
 	 * 插入数据
+	 * @param data 
 	 * @param filedList 字段名称
 	 * @param list 数据集
 	 * @return
 	 */
-	Integer insert(@Param("sql") String sql);
+	Integer insert(Map<String, Object> data);
 	/**
 	 * 获取所有数据表名称
 	 * @param tableName 
@@ -32,6 +33,12 @@ public interface IMysqlDAO {
 	 * @return
 	 */
 	List<Map<String, Object>> getTableStructure(@Param("tableName")String tableName);
+	/**
+	 * 
+	 * @param tableName
+	 * @return
+	 */
+	Integer getCount(@Param("tableName")String tableName);
 
 	
 	
