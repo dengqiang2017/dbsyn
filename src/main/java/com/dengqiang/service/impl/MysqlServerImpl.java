@@ -1,14 +1,20 @@
 package com.dengqiang.service.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.Set;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.dengqiang.controller.BaseController;
@@ -17,6 +23,7 @@ import com.dengqiang.dao.mysql.IMysqlDAO;
 import com.dengqiang.service.IMysqlService;
 import com.dengqiang.tran.Transactional;
 @Service("mysqlService")
+@Scope("prototype")
 public class MysqlServerImpl extends BaseController implements IMysqlService {
 
 	@Autowired
@@ -34,8 +41,8 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 
 	@Transactional
 	@Override
-	public String insertList(String tableName,
-			List<Map<String, Object>> filedList, List<Map<String, Object>> list,SynDataBean bean) {
+	public synchronized String insertList(String tableName,
+			List<Map<String, Object>> filedList, final List<Map<String, Object>> list,final SynDataBean bean) {
 		Integer count=mysqlDao.getCount(tableName);
 		if (count!=null&&count>0) {
 			return "表中有数据,跳过!";
@@ -43,7 +50,7 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 		StringBuffer keys=new StringBuffer("insert into ");
 		keys.append(tableName).append("(");
 		StringBuffer vals=new StringBuffer(")VALUES(");
-		Map<String, String> filedMap=new HashMap<>();
+		final Map<String, String> filedMap=new HashMap<>();
 		for (Iterator<Map<String, Object>> iterator = filedList.iterator(); iterator.hasNext();) {
 			Map<String, Object> map = iterator.next();
 			Object column_name=map.get("column_name");
@@ -65,8 +72,33 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 		vals=new StringBuffer(vals.substring(0, vals.length()-1));
 		vals.append(");");
 		keys.append(vals.toString());
+		final String sql=keys.toString();
+		if (list.size()>1000) {
+			int len=list.size()/500;
+			ExecutorService threadPool = Executors.newFixedThreadPool(len);
+//			List<String> threadlist = new CopyOnWriteArrayList<>();
+//			for (int j = 0; j < len; j++){
+//				threadlist.add(j,"insert-" + j);
+//			}
+			for (int i = 0; i < len; i++) {
+				// TODO 复制list中的数据到每个分别的线程中
+//				List<Map<String, Object>> listdata=Arrays.copyOf(list.toArray(), i,len);
+				threadPool.execute(new Runnable() {
+					@Override
+					public void run() {
+//						insert(list, filedMap, sql, bean);
+					}
+				});
+			}
+			threadPool.shutdown();
+		}else {
+			insert(list, filedMap, sql, bean);
+		}
+		return null;
+	}
+	
+	private synchronized void insert(List<Map<String, Object>> list,Map<String, String> filedMap,String sql,SynDataBean bean) {
 		for (int i = 0; i < list.size(); i++) {
-			//数据处理,去空串
 			Map<String, Object> data=list.get(i);
 			Set<Entry<String, Object>> set= data.entrySet();
 			for (Entry<String, Object> entry : set) {
@@ -78,15 +110,14 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 					}
 				}
 			}
-			data.put("sql", keys.toString());
+			data.put("sql", sql);
 			try {
 				mysqlDao.insert(data);
-				bean.setInsertNum(i);
+				bean.setInsertNum(1);
 			} catch (Exception e) {//
 				bean.setMsg(e.getMessage()+data.toString());
 			}
 		}
-		return null;
 	}
 	
 	@Override

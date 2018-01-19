@@ -1,6 +1,7 @@
 $("#all").click(function(){
 	var b=$(this).prop("checked");
 	$("#mssqlList input").prop("checked",b);
+	$("#selectId").html("");
 });
 $("#find").bind("input",function(){
 	var tableName=$.trim($(this).val());
@@ -79,6 +80,12 @@ function loadData(tableName){
 			li.click(function(){
 				$(this).parent().find("li").removeClass("select");
 				$(this).addClass("select");
+				$("#selectId").html("");
+				var checks=$(".check:checked");
+				for (var i = 0; i < checks.length; i++) {
+					var name=$(checks[i]).next().html();
+					$("#selectId").append("<span>"+name+"<span>");
+				}
 			});
 		}
 		$("#all").parent().append("共"+data.length); 
@@ -194,3 +201,22 @@ function loadMysqlData(tableName){
 		});
 	});
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"''"
+'""'

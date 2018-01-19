@@ -99,7 +99,7 @@
            </list>
         </property>  
     </bean>
-    
+    <bean id="springContextHolder" class="com.dengqiang.service.SpringContextHolder" lazy-init="false"/>
     <!-- 事务管理器-->
     <bean id="transactionManager"
         class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
@@ -117,8 +117,8 @@
 		<property name="configLocation" value="classpath:applicaion-mysql.xml"/>
 	</bean>
 	<bean id="sqlSessionFactoryMssql" class="org.mybatis.spring.SqlSessionFactoryBean"> 
- 		<property name="dataSource"> 
- 			<ref local="dataSourceMssql" /> 
+ 		<property name="dataSource">
+ 			<ref local="dataSourceMssql" />
  		</property> 
  		<property name="configLocation" value="classpath:applicaion-mssql.xml"> 
  		</property> 

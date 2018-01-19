@@ -19,27 +19,34 @@ height:300px;
 width: 100%;
 overflow-y:auto;
 border: 1px solid #ccc;
-
 }
 #mssqlList>li,#mysqlList>li{cursor: pointer;list-style-type: none;margin-left: -38px;}
 .select{background-color: red !important;color: white;}
 .col-md-6{border: 1px solid #ccc;}
-
+#selectId span{border: 1px solid #ccc;}
 </style>
 </head>
 <body>
 	<div class="col-md-6" style="border: 1px solid #ccc;height: 100%;">
 		<h2>sqlserver</h2>
 		<div class="col-md-6">
-			<h3>表名称</h3>
-			<div>
-			    <div>
+		<div>
+			<label style="font-size:14px;font-weight: bold; ">表名称</label>
+			    <div style="display: inline-block;">
 					<input type="text" id="find" class="form-control"
 						style="width: auto;" placeholder="输入表名查找">
 				</div>
+		</div>
+			<div>
 				<ul id="mssqlList"></ul>
 				<div>
 					<label><input type="checkbox" id="all">全选</label>
+				</div>
+				<div title="已选择列表:">
+				<label>已选择列表:</label>
+				<div id="selectId">
+				
+				</div>
 				</div>
 			</div>
 		</div>

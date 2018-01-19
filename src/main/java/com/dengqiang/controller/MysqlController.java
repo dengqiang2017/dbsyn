@@ -1,15 +1,12 @@
 package com.dengqiang.controller;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
-
-import net.sf.json.JSONArray;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -111,13 +108,23 @@ public class MysqlController extends BaseController{
 		boolean success=false;
 		try {
 			if (StringUtils.isNotBlank(tableName)) {
-				Map<String, Object> map=getKeyAndValue(request);
-				SynDataThread th=new SynDataThread(tableName);
-				th.setMap(map);
-				th.setMssqlService(mssqlService);
-				th.setMysqlService(mysqlService);
-				th.setRequest(request.getSession());
-				th.start();
+				if (tableName.startsWith(",")) {
+					tableName=tableName.substring(1, tableName.length());
+				}
+				if (tableName.endsWith(",")) {
+					tableName=tableName.substring(0, tableName.length()-1);
+				}
+				String[] tableNames=tableName.split(",");
+				ExecutorService threadPool = Executors.newFixedThreadPool(tableNames.length);
+				request.getSession().setAttribute("beans",null);
+		        //5个写线程
+		        for (int i = 0; i < tableNames.length; i++){
+		        	SynDataRunnable th=new SynDataRunnable(tableNames[i],getRealPath(request));
+		        	th.setRequest(request.getSession());
+		            threadPool.execute(th);
+		        }
+		        //关闭线程池
+		        threadPool.shutdown();
 				success=true;
 			}else{
 				msg="没有获取到数据表名称";
@@ -158,7 +165,6 @@ public class MysqlController extends BaseController{
 		}else{
 			tableName=null;
 		}
-		log.error("----");
 		return mysqlService.getAllTableName(tableName);
 	}
 	/**

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.dengqiang.dao.mssql.IMssqlDAO;
@@ -13,6 +14,7 @@ import com.dengqiang.tran.ServiceAspect;
 import com.dengqiang.tran.Transactional;
 
 @Service("mssqlService")
+@Scope("prototype")
 public class MssqlServiceImpl implements IMssqlService {
 
 	@Autowired

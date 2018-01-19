@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.dengqiang.service.IMssqlService;
 import com.dengqiang.service.IMysqlService;
+import com.dengqiang.service.SpringContextHolder;
 /**
  * 数据同步线程类
  * @author Administrator
@@ -107,6 +108,8 @@ public class SynDataThread extends Thread{
 						param.put("filedList", filedList);
 						param.put("list", list);
 						param.put("tableName", name);
+						System.out.println(name);
+						System.out.println(filedList);
 						bean.setCountNum(list.size());
 						mysqlService.insertList(name,filedList,list,bean);
 						request.setAttribute("beans", beans);

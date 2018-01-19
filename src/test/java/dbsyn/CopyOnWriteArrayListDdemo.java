@@ -9,12 +9,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.log4j.Logger;
+
 /**
  *  CopyOnWriteArrayList容器使用示例
  *  线程池使用
  */
 public class CopyOnWriteArrayListDdemo {
-
+	Logger log = Logger.getLogger(CopyOnWriteArrayListDdemo.class);
     /**
      * 内容编号
      */

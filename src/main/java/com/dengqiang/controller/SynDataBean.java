@@ -1,5 +1,7 @@
 package com.dengqiang.controller;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class SynDataBean {
 	public SynDataBean(String tableName) {
 		this.tableName=tableName;
@@ -28,7 +30,8 @@ public class SynDataBean {
 		return insertNum;
 	}
 	public void setInsertNum(Integer insertNum) {
-		this.insertNum = insertNum;
+		AtomicInteger a=new AtomicInteger();
+		this.insertNum =a.incrementAndGet();
 	}
 	public Integer getCountNum() {
 		return countNum;

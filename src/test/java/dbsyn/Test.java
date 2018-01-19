@@ -19,8 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -105,27 +110,27 @@ public class Test {
 //		//SOP和RPC
 //	}
 	
-//	public static void main(String[] args) {
-//		Test test=new Test();
-//		String url="http://10.18.2.76:8015/SPDJ/PutMeetingInfoToDB";
-//		JSONObject json=new JSONObject();
-//		json.put("WJID", "test_123456");
-//		json.put("HYID", "test_456123");
-//		json.put("KSSJ", "2018-01-16 12:12:12");
-//		json.put("JSSJ", "2018-01-16 14:12:12");
-//		json.put("HYMC", "中石化会议");
-//		json.put("CHRYIDLB", "[123,123,234]");
-//		json.put("HYFQR", "hubin.xnyq");
-//		json.put("WJSPDZ", "http://10.18.2.76/test/audio");
-//		json.put("WJYPDZ", "http://10.18.2.76/test/video");
-//		json.put("SPWNSFRK", false);
-//		json.put("YPWNSFRK", true);
-//		json.put("BZ", "test_备注");
-//		test.postData(url, json);
-//	}
-	
 	public static void main(String[] args) {
-		//队列 先进先出
+		Test test=new Test();
+		String url="http://10.18.2.76:8015/SPDJ/PutMeetingInfoToDB";
+		JSONObject json=new JSONObject();
+		json.put("WJID", "test_123456");
+		json.put("HYID", "test_456123");
+		json.put("KSSJ", "2018-01-16 12:12:12");
+		json.put("JSSJ", "2018-01-16 14:12:12");
+		json.put("HYMC", "中石化会议");
+		json.put("CHRYIDLB", "[123,123,234]");
+		json.put("HYFQR", "hubin.xnyq");
+		json.put("WJSPDZ", "http://10.18.2.76/test/audio");
+		json.put("WJYPDZ", "http://10.18.2.76/test/video");
+		json.put("SPWNSFRK", false);
+		json.put("YPWNSFRK", true);
+		json.put("BZ", "test_备注");
+		test.postData(url, json);
+	}
+	
+//	public static void main(String[] args) {
+	/*	//队列 先进先出
 		Queue<String> queue=new LinkedList<>();
 		//添加元素
         queue.offer("a");
@@ -154,7 +159,8 @@ public class Test {
         
         AtomicInteger count = new AtomicInteger();
         count.incrementAndGet();//自增长
-	}
+        */
+//	}
 	
 	public String postData(String url, JSONObject json) {
 		try {
@@ -162,12 +168,12 @@ public class Test {
 //			SSLContext sc = SSLContext.getInstance("TLSv1");
 //			sc.init(null, new TrustManager[] { new TrustAnyTrustManager() },
 //					new java.security.SecureRandom());
-			URL httpurl = new URL(url);
+			URL httpurl = new URL(url+"?szInfo="+json.toString());
 			HttpURLConnection connection = (HttpURLConnection) httpurl
 					.openConnection();
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
-			connection.setRequestMethod("POST");
+			connection.setRequestMethod("GET");
 			connection.setUseCaches(false);
 			connection.setInstanceFollowRedirects(true);
 			connection.setRequestProperty("Content-Type", "application/json");
@@ -180,7 +186,8 @@ public class Test {
 			DataOutputStream out = new DataOutputStream(
 					connection.getOutputStream());
 			System.out.println("szInfo="+json.toString());
-			out.write(("szInfo="+json.toString()).getBytes("UTF-8"));
+			out.writeChars("szInfo=12312");//te("szInfo=12312".getBytes("utf-8"));
+			//out.write(("szInfo="+json.toString()).getBytes("UTF-8"));
 			out.flush();
 			out.close();
 			// 读取响应
