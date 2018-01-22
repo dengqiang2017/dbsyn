@@ -1,24 +1,23 @@
 package com.dengqiang.service.impl;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.Set;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.dengqiang.controller.BaseController;
-import com.dengqiang.controller.SynDataBean;
+import com.dengqiang.controller.SynDataLogBean;
 import com.dengqiang.dao.mysql.IMysqlDAO;
 import com.dengqiang.service.IMysqlService;
 import com.dengqiang.tran.Transactional;
@@ -41,92 +40,150 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 
 	@Transactional
 	@Override
-	public synchronized String insertList(String tableName,
-			List<Map<String, Object>> filedList, final List<Map<String, Object>> list,final SynDataBean bean) {
+	public SynDataLogBean insertList(String tableName, List<Map<String, Object>> list,SynDataLogBean bean) throws Exception {
 		Integer count=mysqlDao.getCount(tableName);
 		if (count!=null&&count>0) {
-			return "表中有数据,跳过!";
+			bean.setMsg("表中有数据,跳过!");
+			return bean;
 		}
-		StringBuffer keys=new StringBuffer("insert into ");
-		keys.append(tableName).append("(");
-		StringBuffer vals=new StringBuffer(")VALUES(");
-		final Map<String, String> filedMap=new HashMap<>();
-		for (Iterator<Map<String, Object>> iterator = filedList.iterator(); iterator.hasNext();) {
-			Map<String, Object> map = iterator.next();
-			Object column_name=map.get("column_name");
-			if("image".equals(map.get("type_name"))){
-				iterator.remove();
-			}else if (column_name.toString().toLowerCase().contains("seeds_id")) {
-				iterator.remove();
-			}else if("id".equals(column_name.toString().toLowerCase())){
-				iterator.remove();
-			}else{
-				keys.append(map.get("column_name")).append(",");
-				vals.append("#{").append(map.get("column_name")).append("},");
-				if("varchar".equals(map.get("type_name"))||"char".equals(map.get("type_name"))){
-					filedMap.put(MapUtils.getString(map, "column_name"), "String");
+		if (list!=null&&list.size()>0) {
+			if (list.size()>500) {
+				int len=list.size()/500;
+				ExecutorService threadPool = Executors.newFixedThreadPool(len);
+				for (int i = 0; i < len; i++) {
+					// TODO 复制list中的数据到每个分别的线程中
+					Object[] obj= Arrays.copyOfRange(list.toArray(), i*500, (i+1)*500);
+					InsertRunnable insert=new InsertRunnable(obj, tableName, bean);
+					threadPool.execute(insert);
 				}
+				threadPool.shutdown();
+			}else {
+				insert(list, tableName, bean);
 			}
 		}
-		keys=new StringBuffer(keys.substring(0, keys.length()-1));
-		vals=new StringBuffer(vals.substring(0, vals.length()-1));
-		vals.append(");");
-		keys.append(vals.toString());
-		final String sql=keys.toString();
-		if (list.size()>1000) {
-			int len=list.size()/500;
-			ExecutorService threadPool = Executors.newFixedThreadPool(len);
-//			List<String> threadlist = new CopyOnWriteArrayList<>();
-//			for (int j = 0; j < len; j++){
-//				threadlist.add(j,"insert-" + j);
-//			}
-			for (int i = 0; i < len; i++) {
-				// TODO 复制list中的数据到每个分别的线程中
-//				List<Map<String, Object>> listdata=Arrays.copyOf(list.toArray(), i,len);
-				threadPool.execute(new Runnable() {
-					@Override
-					public void run() {
-//						insert(list, filedMap, sql, bean);
-					}
-				});
-			}
-			threadPool.shutdown();
-		}else {
-			insert(list, filedMap, sql, bean);
-		}
-		return null;
+		return bean;
 	}
 	
-	private synchronized void insert(List<Map<String, Object>> list,Map<String, String> filedMap,String sql,SynDataBean bean) {
-		for (int i = 0; i < list.size(); i++) {
-			Map<String, Object> data=list.get(i);
-			Set<Entry<String, Object>> set= data.entrySet();
-			for (Entry<String, Object> entry : set) {
-				if("String".equals(filedMap.get(entry.getKey()))){
-					if (entry.getValue()==null) {
-						data.put(entry.getKey(), "");
-					}else{
-						data.put(entry.getKey(), entry.getValue().toString().trim());
+	class InsertRunnable implements Runnable{
+		private Object[] objs;
+		private String tableName;
+		private SynDataLogBean bean;
+		
+		public InsertRunnable(Object[] objs,String tableName,SynDataLogBean bean) {
+			this.objs = objs;
+			this.tableName = tableName;
+			this.bean = bean;
+		}
+		@Override
+		public void run() {
+			for (int i = 0; i < objs.length; i++) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> data=(Map<String, Object>) objs[i];
+				if (data!=null&&!data.isEmpty()) {
+					String sqlStr=getSql(data, tableName);
+					data.put("sql", sqlStr);
+					try {
+						mysqlDao.insert(data);
+					} catch (Exception e) {
+						System.out.println(objs[i]);
 					}
+					bean.setInsertNum(1);
+					File file=new File("D:\\logs\\data.log");
+					saveFile(file,sqlStr.toString()+"\r\n",true);
 				}
 			}
-			data.put("sql", sql);
-			try {
-				mysqlDao.insert(data);
+		}
+		
+	}
+	/**
+	 * 将sql中参数对应,并返回完整sql
+	 * @param data
+	 * @param tableName
+	 * @return
+	 */
+	private static synchronized String getSql(Map<String, Object> data, String tableName){
+		Set<Entry<String, Object>> set= data.entrySet();
+		if (data==null||data.isEmpty()) {
+			throw new RuntimeException("没有数据");
+		}
+		StringBuffer sql=new StringBuffer("insert into ");
+		sql.append(tableName).append("(");
+		StringBuffer vals=new StringBuffer(")VALUES(");
+		for (Iterator<Entry<String, Object>> iterator = set.iterator(); iterator.hasNext();) {
+			Entry<String, Object> entry =iterator.next();
+			Object value=entry.getValue();
+			if (value!=null) {
+				String key=entry.getKey();
+				if ("id".equals(key.toLowerCase())) {
+				}else if(key.toLowerCase().contains("seeds_id")){
+				}else if(value.toString().contains("BlobImpl")){
+					File file=new File("D:\\logs\\data-sql.log");
+					saveFile(file,value.toString()+"\r\n",true);
+				}else{
+					if ("show".equals(key.toLowerCase())) {
+						key="f_show";
+					}
+					sql.append(key).append(",");
+					if(value!=null){
+						if (value instanceof String) {
+							data.put(key, value.toString().trim());
+						}
+					}
+//					if (value instanceof Number) {
+//						vals.append(value.toString().trim()).append(",");
+//					}else{
+//						vals.append("'").append(value.toString().trim()).append("',");
+//					}
+					vals.append("#{").append(key).append("},");
+				}
+			}
+		}
+		String sqlStr=sql.substring(0, sql.length()-1);
+		sqlStr=sqlStr+vals.substring(0, vals.length()-1);
+		return sqlStr+")";
+	}
+	
+	private synchronized void insert(List<Map<String, Object>> list,String tableName,SynDataLogBean bean) throws Exception {
+		for (int i = 0; i < list.size(); i++) {
+			Map<String, Object> data=list.get(i);
+			if (data!=null&&!data.isEmpty()) {
+				String sqlStr=getSql(data, tableName);
+				data.put("sql", sqlStr);
+				try {
+					mysqlDao.insert(data);
+				} catch (Exception e) {
+					System.out.println(list.get(i));
+				}
 				bean.setInsertNum(1);
-			} catch (Exception e) {//
-				bean.setMsg(e.getMessage()+data.toString());
+				File file=new File("D:\\logs\\data.log");
+				saveFile(file,sqlStr.toString()+"\r\n",true);
 			}
 		}
 	}
 	
 	@Override
-	public List<Map<String, Object>> getAllTableName(String tableName) {
-		return mysqlDao.getAllTableName(tableName);
+	public List<Map<String, Object>> getAllTableName(String tableName, String count) {
+		List<Map<String, Object>> list=mysqlDao.getAllTableName(tableName);
+		if ("true".equals(count)) {
+			for (Iterator<Map<String, Object>> iterator = list.iterator(); iterator.hasNext();) {
+				Map<String, Object> map = iterator.next();
+				map.put("count", mysqlDao.getCount(MapUtils.getString(map, "table_name")));
+			}
+		}
+		return list;
 	}
 	@Override
 	public List<Map<String, Object>> getTableStructure(String tableName) {
 		
 		return mysqlDao.getTableStructure(tableName);
 	}	
+	
+	@Override
+	public String cleraData(String[] tableNames) {
+		Map<String, Object> map=new HashMap<>();
+		map.put("tableNames", tableNames);
+		mysqlDao.cleraData(map);
+		System.out.println("清除完成!");
+		return null;
+	}
 }

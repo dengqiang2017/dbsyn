@@ -1,9 +1,11 @@
 package com.dengqiang.service.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -22,8 +24,15 @@ public class MssqlServiceImpl implements IMssqlService {
 	
 	@Override
 	@Transactional(name=ServiceAspect.transactionManagerMssqlName)
-	public List<Map<String, Object>> getAllTableName(String tableName)throws Exception {
-		return mssqlDao.getAllTableName(tableName);
+	public List<Map<String, Object>> getAllTableName(String tableName,String count)throws Exception {
+		List<Map<String, Object>> list=mssqlDao.getAllTableName(tableName);
+		if ("true".equals(count)) {
+			for (Iterator<Map<String, Object>> iterator = list.iterator(); iterator.hasNext();) {
+				Map<String, Object> map = iterator.next();
+				map.put("count", mssqlDao.getCount(MapUtils.getString(map, "name")));
+			}
+		}
+		return list;
 	}
 	
 	@Override

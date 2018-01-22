@@ -62,4 +62,11 @@ use o2o;
 <select id="getCount" parameterType="String" resultType="Integer">
 select count(*) from ${tableName}
 </select>
+
+<delete id="cleraData" parameterType="hashMap">
+        <foreach  collection="tableNames" item="tableName">   
+           truncate table ${tableName};
+        </foreach>  
+</delete>
+
 </mapper>

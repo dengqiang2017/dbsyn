@@ -32,5 +32,7 @@ public interface IMssqlDAO {
 	 * @return
 	 */
 	List<Map<String, Object>> getTableData(@Param("tableName")String tableName, @Param("rows")Integer rows);
+	
+	Integer getCount(@Param("tableName")String tableName);
 
 }

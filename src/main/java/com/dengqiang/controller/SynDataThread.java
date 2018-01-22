@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.dengqiang.service.IMssqlService;
 import com.dengqiang.service.IMysqlService;
-import com.dengqiang.service.SpringContextHolder;
 /**
  * 数据同步线程类
  * @author Administrator
@@ -84,22 +83,22 @@ public class SynDataThread extends Thread{
 					List<Map<String, Object>> list=mssqlService.getDataByTableName(map);
 					if (list!=null&&list.size()>0) {
 						@SuppressWarnings("unchecked")
-						List<SynDataBean> beans=(List<SynDataBean>) request.getAttribute("beans");
-						SynDataBean bean=null;
+						List<SynDataLogBean> beans=(List<SynDataLogBean>) request.getAttribute("beans");
+						SynDataLogBean bean=null;
 						if(beans==null){
 							beans=new ArrayList<>();
-							bean=new SynDataBean(name);
+							bean=new SynDataLogBean(name);
 							beans.add(bean);
 						}else{
 							for (int i = 0; i < beans.size(); i++) {
-								SynDataBean synDataBean=beans.get(i);
+								SynDataLogBean synDataBean=beans.get(i);
 								if(name.equals(synDataBean.getTableName())){
 									bean=synDataBean;
 									break;
 								}
 							}
 							if(bean==null){
-								bean=new SynDataBean(name);
+								bean=new SynDataLogBean(name);
 								beans.add(bean);
 							}
 						}
@@ -108,10 +107,8 @@ public class SynDataThread extends Thread{
 						param.put("filedList", filedList);
 						param.put("list", list);
 						param.put("tableName", name);
-						System.out.println(name);
-						System.out.println(filedList);
 						bean.setCountNum(list.size());
-						mysqlService.insertList(name,filedList,list,bean);
+						mysqlService.insertList(name,list,bean);
 						request.setAttribute("beans", beans);
 						File file=new File("E:\\dbsyn\\insert.log");
 						JSONArray jsons=JSONArray.fromObject(beans);

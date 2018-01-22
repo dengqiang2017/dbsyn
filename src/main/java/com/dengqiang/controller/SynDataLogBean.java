@@ -1,15 +1,18 @@
 package com.dengqiang.controller;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SynDataBean {
-	public SynDataBean(String tableName) {
+public class SynDataLogBean implements Serializable{
+	private static final long serialVersionUID = 557416195042025195L;
+	public SynDataLogBean(String tableName) {
 		this.tableName=tableName;
 	}
 	String tableName;
-	String msg=null;
+	String msg="";
 	Integer insertNum;
 	Integer countNum;
+	AtomicInteger a=new AtomicInteger();
 	public String getTableName() {
 		return tableName;
 	}
@@ -30,7 +33,6 @@ public class SynDataBean {
 		return insertNum;
 	}
 	public void setInsertNum(Integer insertNum) {
-		AtomicInteger a=new AtomicInteger();
 		this.insertNum =a.incrementAndGet();
 	}
 	public Integer getCountNum() {
@@ -39,7 +41,9 @@ public class SynDataBean {
 	public void setCountNum(Integer countNum) {
 		this.countNum = countNum;
 	}
-	
-	
-	
+	@Override
+	public String toString() {
+		return "{\"tableName\":\"" + tableName + "\", \"msg\":\"" + msg
+				+ "\", \"insertNum\":" + insertNum + ", \"countNum\":" + countNum + "}";
+	}
 }

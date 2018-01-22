@@ -82,13 +82,13 @@ public abstract class BaseController {
 	 * @param file 文件存储路径
 	 * @param str 存储数据
 	 */
-	public synchronized void saveFile(File file,String str){
+	public synchronized static void saveFile(File file,String str,boolean append){
 			try {
 				if (!file.getParentFile().exists()) {
 					file.getParentFile().mkdirs();
 				}
 				OutputStreamWriter outputStream = new OutputStreamWriter(
-						new FileOutputStream(file),
+						new FileOutputStream(file,append),
 						"UTF-8");
 				outputStream.write(str);
 				outputStream.flush();

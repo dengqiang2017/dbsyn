@@ -24,6 +24,9 @@ border: 1px solid #ccc;
 .select{background-color: red !important;color: white;}
 .col-md-6{border: 1px solid #ccc;}
 #selectId span{border: 1px solid #ccc;}
+#syndata{
+overflow: auto;
+    height: 500px;}
 </style>
 </head>
 <body>
@@ -36,11 +39,13 @@ border: 1px solid #ccc;
 					<input type="text" id="find" class="form-control"
 						style="width: auto;" placeholder="输入表名查找">
 				</div>
+				<button type="button" onclick="loadData();">刷新</button>
 		</div>
 			<div>
 				<ul id="mssqlList"></ul>
 				<div>
-					<label><input type="checkbox" id="all">全选</label>
+					<label><input type="checkbox" id="all">全选<span id="countTable"></span></label>
+					<label><input type="checkbox" id="mssqlCount">每个表的总数</label>
 				</div>
 				<div title="已选择列表:">
 				<label>已选择列表:</label>
@@ -66,14 +71,21 @@ border: 1px solid #ccc;
 				</div>
 				<ul id="mysqlList"></ul>
 				<div>
-					<label><input type="checkbox" id="allmysql">全选</label>
+					<label><input type="checkbox" id="allmysql">全选<span id="mysqlCountTable"></span></label>
+					<label><input type="checkbox" id="mysqlCount">每个表的总数</label>
 				</div>
 			</div>
 		</div>
 		<div class="col-md-6" id="mysqlStructure">
 		</div>
 		<div class="col-md-6">
-		<h2>数据同步信息:</h2>
+		<h2>数据同步信息:<span id="count"></span></h2>
+		<div>
+		<label><input type="checkbox" id="insertNum" checked="checked">表中有数据</label>
+		<label><input type="checkbox" id="countNum" checked="checked">总数等于0</label>
+		<label><input type="button" id="refresh" value="刷新"></label>
+		<label><input type="button" id="stop" value="停止"></label>
+		</div>
 		<div id="syndata">
 			<div class="item">
 			表名:<span class="tableName"></span>&emsp;
@@ -91,6 +103,7 @@ border: 1px solid #ccc;
    <button type="button" class="btn btn-info" id="syn">同步数据表结构到mysql</button>
    <button type="button" class="btn btn-info" id="synData">同步表数据到mysql</button>
 			<button type="button" class="btn btn-info" id="clearTable">清除数据</button>
+			<button type="button" class="btn btn-info" id="clearData" style="float: right;">清除MySql表中所有数据</button>
   </div>
 </nav>
 	<script type="text/javascript" src="index.js"></script>

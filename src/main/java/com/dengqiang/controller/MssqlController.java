@@ -28,7 +28,9 @@ public class MssqlController extends BaseController{
 	 */
 	@RequestMapping("getAllTableName")
 	@ResponseBody
-	public List<Map<String, Object>> getAllTableName(HttpServletRequest request,String tableName) throws Exception {
+	public List<Map<String, Object>> getAllTableName(HttpServletRequest request) throws Exception {
+		String tableName=request.getParameter("tableName");
+		String count=request.getParameter("count");
 		if (StringUtils.isNotBlank(tableName)) {
 			if(!"undefined".equals(tableName)){
 				tableName="%"+tableName+"%";
@@ -38,7 +40,7 @@ public class MssqlController extends BaseController{
 		}else{
 			tableName=null;
 		}
-		return mssqlService.getAllTableName(tableName);
+		return mssqlService.getAllTableName(tableName,count);
 	}
 	/**
 	 * 获取表结构
@@ -55,8 +57,6 @@ public class MssqlController extends BaseController{
 		}
 		return mssqlService.getTableStructure(tableName);
 	}
-	
-	
 	/**
 	 * 获取表中的数据
 	 * @param request

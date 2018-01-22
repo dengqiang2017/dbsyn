@@ -12,13 +12,21 @@ function loadData(tableName){
 	if(!tableName){
 		tableName="";
 	}
-	$("#mssqlList").html("");
 	pop_up_box.loadWait();
-	$.get("mssql/getAllTableName.do",{"tableName":tableName},function(data){
+	var count=$("#mssqlCount").prop("checked");
+	$.get("mssql/getAllTableName.do",{"tableName":tableName,"count":count},function(data){
+		$("#mssqlList").html("");
 		for (var i = 0; i < data.length; i++) {
 			var n=data[i];
+			if (n.name.indexOf("$")>=0) {
+				continue;
+			}
+			var countHtml="";
+			if(count){
+				countHtml="("+n.count+")";
+			}
 			var li=$("<li><label><input type='checkbox' class='check'><span class='tableName'>"+n.name
-					+"</span></label>&emsp;&emsp;<button type='button' class='btn btn-xs btn-info'>表结构数据</button></li>");
+					+"</span><span>"+countHtml+"</span></label>&emsp;&emsp;<button type='button' class='btn btn-xs btn-info'>表结构数据</button></li>");
 			$("#mssqlList").append(li);
 			if(i%2==0){
 				li.css("background-color","#cccccc");
@@ -88,12 +96,33 @@ function loadData(tableName){
 				}
 			});
 		}
-		$("#all").parent().append("共"+data.length); 
+		$("#countTable").html("共"+data.length); 
 	    pop_up_box.loadWaitClose();
 	});
 }
 $("#clearTable").click(function(){
 	$("#dataTable,#mssqlStructure").html("");
+});
+$("#clearData").click(function(){
+	var checks=$(".check:checked");
+	var tableName="";
+	for (var i = 0; i < checks.length; i++) {
+		var name=$(checks[i]).next().html();
+		if (name.indexOf("$")<0) {
+			tableName=tableName+","+name;
+		}
+	}
+	pop_up_box.postWait();
+	$.get("mysql/cleraData.do",{
+		"tableName":tableName
+	},function(data){
+		pop_up_box.loadWaitClose();
+		if(data.success){
+			pop_up_box.showMsg("清除成功!",2000);
+		}else{
+			pop_up_box.showMsg(data.msg);
+		}
+	});
 });
 $("#syn").click(function(){
 	var checks=$(".check:checked");
@@ -108,13 +137,14 @@ $("#syn").click(function(){
 	},function(data){
 		pop_up_box.loadWaitClose();
 		if(data.success){
-			pop_up_box.showMsg("创建成功!");
+			pop_up_box.toast("同步表结构成功!",2000);
 		}else{
 			pop_up_box.showMsg(data.msg);
 		}
 	});
 });
 var insertInfo;
+var mysqlCount=0;
 var itemhtml=$("#syndata").html();
 $("#synData").click(function(){
 	var checks=$(".check:checked");
@@ -130,33 +160,81 @@ $("#synData").click(function(){
 		pop_up_box.loadWaitClose();
 		if(data.success){
 //			pop_up_box.showMsg("创建成功!");
-			insertInfo=setInterval(function(){
-				$.get("mysql/getInsertInfo.do",function(data){
-					if(data&&data.length>0){
-						$("#syndata").html("");
-						for (var i = 0; i < data.length; i++) {
-							var json=data[i];
-							var item=$(itemhtml);
-							$("#syndata").append(item);
-							item.find(".tableName").html(json.tableName);
-							item.find(".countNum").html(json.countNum);
-							item.find(".insertNum").html(json.insertNum);
-							item.find(".msg").html(json.msg);
-						}
-					}else{
-						clearInterval(insertInfo);
-					}
-				});
-			},500);
+			setTimeout(function(){
+				insertInfo=setInterval(function(){
+					refreshLog();
+				},500);
+			}, 2000);
 		}else{
 			pop_up_box.showMsg(data.msg);
 		}
 	});
 });
-
-$("#findMysql").click(function(){
+$("#findMysql").bind("input",function(){
 	var tableName=$.trim($(this).val());
 	loadMysqlData(tableName);
+});
+$("#stop").bind("input",function(){
+	clearInterval(insertInfo);
+});
+function refreshLog(){
+		$.get("mysql/getInsertInfo.do",function(data){
+		if(data&&data.length>0){
+			$("#syndata").html("");
+			for (var i = 0; i < data.length; i++) {
+				var json=data[i];
+				if(json.insertNum==null&&!$("#insertNum").prop("checked")){
+					continue;
+				}
+				if(json.countNum==0&&!$("#countNum").prop("checked")){
+					continue;
+				}
+				var item=$(itemhtml);
+				$("#syndata").append(item);
+				item.find(".tableName").html(json.tableName);
+				item.find(".countNum").html(json.countNum);
+				item.find(".insertNum").html(json.insertNum);
+				item.find(".msg").html(json.msg);
+			}
+		}else{
+			clearInterval(insertInfo);
+		}
+		$("#count").html(data.length);
+		if (data.length==mysqlCount) {
+			clearInterval(insertInfo);
+		}
+	});
+}
+$("#refresh").click(function(){
+	$.get("log/insert2018-01-22.log",function(data){
+	if(data&&data.length>0){
+		$("#syndata").html("");
+		for (var i = 0; i < data.length; i++) {
+			var json=data[i];
+			if(json.insertNum==null&&!$("#insertNum").prop("checked")){
+				continue;
+			}
+			if(json.countNum==0&&!$("#countNum").prop("checked")){
+				continue;
+			}
+			var item=$(itemhtml);
+			$("#syndata").append(item);
+			item.find(".tableName").html(json.tableName);
+			item.find(".countNum").html(json.countNum);
+			item.find(".insertNum").html(json.insertNum);
+			item.find(".msg").html(json.msg);
+		}
+		}else{
+			clearInterval(insertInfo);
+		}
+		$("#count").html(data.length);
+		if (data.length==mysqlCount) {
+			clearInterval(insertInfo);
+		}
+	});
+});
+$("#mysqlCount").click(function(){
+	loadMysqlData();
 });
 loadMysqlData();
 function loadMysqlData(tableName){
@@ -165,17 +243,23 @@ function loadMysqlData(tableName){
 	}
 	$("#mysqlList").html("");
 	pop_up_box.loadWait();
-	$.get("mysql/getAllTableName.do",{"tableName":tableName},function(data){
+	var count=$("#mysqlCount").prop("checked");
+	$.get("mysql/getAllTableName.do",{"tableName":tableName,"count":count},function(data){
 		pop_up_box.loadWaitClose();
 		for (var i = 0; i < data.length; i++) {
 			var n=data[i];
-			var li=$("<li><span class='tableName'>"+n.table_name+"</span></li>");
+			var countHtml="";
+			if(count){
+				countHtml="("+n.count+")";
+			}
+			var li=$("<li><span class='tableName'>"+n.table_name+"</span><span>"+countHtml+"</span></li>");
 			$("#mysqlList").append(li);
 			if(i%2==0){
 				li.css("background-color","#ccc");
 			}
 		}
-		$("#allmysql").parent().append("共"+data.length); 
+		mysqlCount=data.length;
+		$("#mysqlCountTable").html("共"+data.length); 
 		$("#mysqlList li").bind("click",function(){
 			$(this).parent().find("li").removeClass("select");
 			$(this).addClass("select");
@@ -201,22 +285,3 @@ function loadMysqlData(tableName){
 		});
 	});
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"''"
-'""'

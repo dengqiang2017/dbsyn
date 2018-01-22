@@ -1,8 +1,10 @@
 package com.dengqiang.controller;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -97,6 +99,36 @@ public class MysqlController extends BaseController{
 		return new ResultInfo(success, msg);
 	}
 	/**
+	 * 
+	 * @param request
+	 * @param tableName
+	 * @return
+	 */
+	@RequestMapping("cleraData")
+	@ResponseBody
+	public ResultInfo cleraData(HttpServletRequest request,String tableName) {
+		String msg=null;
+		boolean success=false;
+		try {
+			if (StringUtils.isNotBlank(tableName)) {
+				if (tableName.startsWith(",")) {
+					tableName=tableName.substring(1, tableName.length());
+				}
+				if (tableName.endsWith(",")) {
+					tableName=tableName.substring(0, tableName.length()-1);
+				}
+				String[] tableNames=tableName.split(",");
+				mysqlService.cleraData(tableNames);
+				success=true;
+			}
+		} catch (Exception e) {
+			msg=e.getMessage();
+			e.printStackTrace();
+		}
+		return new ResultInfo(success, msg);
+	}
+	
+	/**
 	 * 同步数据
 	 * @param request
 	 * @return
@@ -116,8 +148,10 @@ public class MysqlController extends BaseController{
 				}
 				String[] tableNames=tableName.split(",");
 				ExecutorService threadPool = Executors.newFixedThreadPool(tableNames.length);
-				request.getSession().setAttribute("beans",null);
-		        //5个写线程
+		        //5个写线程 
+//				List<SynDataLogBean> beans=new ArrayList<>(tableNames.length);
+				List<SynDataLogBean> beans=new Vector<>(tableNames.length);
+				request.getSession().setAttribute("beans", beans);
 		        for (int i = 0; i < tableNames.length; i++){
 		        	SynDataRunnable th=new SynDataRunnable(tableNames[i],getRealPath(request));
 		        	th.setRequest(request.getSession());
@@ -155,7 +189,9 @@ public class MysqlController extends BaseController{
 	 */
 	@RequestMapping("getAllTableName")
 	@ResponseBody
-	public List<Map<String, Object>> getAllTableName(HttpServletRequest request,String tableName) throws Exception {
+	public List<Map<String, Object>> getAllTableName(HttpServletRequest request) throws Exception {
+		String tableName=request.getParameter("tableName");
+		String count=request.getParameter("count");
 		if (StringUtils.isNotBlank(tableName)) {
 			if(!"undefined".equals(tableName)){
 				tableName="%"+tableName+"%";
@@ -165,7 +201,7 @@ public class MysqlController extends BaseController{
 		}else{
 			tableName=null;
 		}
-		return mysqlService.getAllTableName(tableName);
+		return mysqlService.getAllTableName(tableName,count);
 	}
 	/**
 	 * 获取表结构

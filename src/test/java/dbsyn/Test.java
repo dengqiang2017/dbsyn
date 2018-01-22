@@ -5,45 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
+import java.net.URLEncoder;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.xml.bind.Marshaller.Listener;
 
 import net.sf.json.JSONObject;
 
@@ -121,14 +89,60 @@ public class Test {
 		json.put("HYMC", "中石化会议");
 		json.put("CHRYIDLB", "[123,123,234]");
 		json.put("HYFQR", "hubin.xnyq");
-		json.put("WJSPDZ", "http://10.18.2.76/test/audio");
-		json.put("WJYPDZ", "http://10.18.2.76/test/video");
+		json.put("HYYPDZ", "http://10.18.2.76/test/audio");
+		json.put("HYSPDZ", "http://10.18.2.76/test/video");
+		json.put("YPMD5", "YPMD5");
+		json.put("SPMD5", "SPMD5");
+		json.put("SPWJSFCZ", false);
+		json.put("YPWJSFCZ", true);
 		json.put("SPWNSFRK", false);
 		json.put("YPWNSFRK", true);
 		json.put("BZ", "test_备注");
-		test.postData(url, json);
+//		test.postData(url, json);
+		try {
+			SendGet(url+"?szInfo="+URLEncoder.encode(json.toString(),"utf-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		//string WJID;                                    //文件ID
+        //float HYID;                                     //会议ID
+        //DateTime KSSJ;                                  //开始时间
+        //DateTime JSSJ;                                  //会议结束时间
+        //string HYMC;                                    //会议名称
+        //List<string> CHRYIDLB;                          //参会人员ID
+        //string HYFQR;                                   //发起会议人员
+        //string HYSPDZ;                                  //会议视频地址   没有就为空
+        //string HYYPDZ;                                  //会议音频地址   没有就为空
+        //string SPMD5;                                   //视频MD5码   没有就为空
+        //string YPMD5;                                   //音频MD5码   没有就为空
+        //bool SPWJSFCZ;                                  //视频文件是否入库
+        //bool YPWJSFCZ;                                  //音频文件是否入库
+        //bool SPWNSFRK;                                  //视频文件是否入库
+        //bool YPWNSFRK;                                  //音频文件是否入库
+        //string BZ;                                      //备注
 	}
-	
+	public static String SendGet(String url) {
+		String result = "";
+		try {
+			System.out.println(url);
+			URL httpurl = new URL(url);
+			HttpURLConnection httpConn = (HttpURLConnection) httpurl
+					.openConnection();
+			httpConn.setDoInput(true);
+			httpConn.setReadTimeout(30*1000);  
+			httpConn.setRequestMethod("GET");
+			BufferedReader readin = new BufferedReader(new InputStreamReader(
+					httpConn.getInputStream()));
+			String CurLine;
+			while ((CurLine = readin.readLine()) != null) {
+				result += CurLine;
+			}
+			readin.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 //	public static void main(String[] args) {
 	/*	//队列 先进先出
 		Queue<String> queue=new LinkedList<>();
@@ -168,12 +182,12 @@ public class Test {
 //			SSLContext sc = SSLContext.getInstance("TLSv1");
 //			sc.init(null, new TrustManager[] { new TrustAnyTrustManager() },
 //					new java.security.SecureRandom());
-			URL httpurl = new URL(url+"?szInfo="+json.toString());
+			URL httpurl = new URL(url);
 			HttpURLConnection connection = (HttpURLConnection) httpurl
 					.openConnection();
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
-			connection.setRequestMethod("GET");
+			connection.setRequestMethod("POST");
 			connection.setUseCaches(false);
 			connection.setInstanceFollowRedirects(true);
 			connection.setRequestProperty("Content-Type", "application/json");
@@ -186,8 +200,7 @@ public class Test {
 			DataOutputStream out = new DataOutputStream(
 					connection.getOutputStream());
 			System.out.println("szInfo="+json.toString());
-			out.writeChars("szInfo=12312");//te("szInfo=12312".getBytes("utf-8"));
-			//out.write(("szInfo="+json.toString()).getBytes("UTF-8"));
+			out.write(("szInfo="+json.toString()).getBytes("UTF-8"));
 			out.flush();
 			out.close();
 			// 读取响应

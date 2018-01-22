@@ -41,4 +41,7 @@
  	select top ${rows} * from ${tableName}
  	</select>
  	
+ 	<select id="getCount" parameterType="String" resultType="Integer">
+ 	 select count(*) from ${tableName}
+ 	</select>
 </mapper>

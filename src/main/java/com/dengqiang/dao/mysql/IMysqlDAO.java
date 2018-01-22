@@ -39,7 +39,11 @@ public interface IMysqlDAO {
 	 * @return
 	 */
 	Integer getCount(@Param("tableName")String tableName);
-
-	
+	/**
+	 * 
+	 * @param tableNames
+	 * @return
+	 */
+	Integer cleraData(Map<String, Object> map);
 	
 }

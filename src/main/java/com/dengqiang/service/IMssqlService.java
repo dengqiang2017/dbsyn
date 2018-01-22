@@ -7,10 +7,11 @@ public interface IMssqlService {
 	/**
 	 * 获取所有表名称
 	 * @param tableName 
+	 * @param count 
 	 * @param map
 	 * @return
 	 */
-	List<Map<String, Object>> getAllTableName(String tableName) throws Exception;
+	List<Map<String, Object>> getAllTableName(String tableName, String count) throws Exception;
 	/**
 	 * 获取表结构
 	 * @param tableName 表名

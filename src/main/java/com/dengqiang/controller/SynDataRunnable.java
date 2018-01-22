@@ -1,10 +1,7 @@
 package com.dengqiang.controller;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +22,7 @@ import com.dengqiang.service.SpringContextHolder;
  * @author Administrator
  *
  */
-public class SynDataRunnable extends BaseController  implements Runnable{
+public class SynDataRunnable extends BaseController implements Runnable{
 	
 	private HttpSession request;
 	
@@ -43,26 +40,6 @@ public class SynDataRunnable extends BaseController  implements Runnable{
 	public void setRequest(HttpSession request) {
 		this.request = request;
 	}
-	/**
-	 * 保存数据到文件中
-	 * @param file 文件存储路径
-	 * @param str 存储数据
-	 */
-	public synchronized void saveFile(File file,String str){
-			try {
-				if (!file.getParentFile().exists()) {
-					file.getParentFile().mkdirs();
-				}
-				OutputStreamWriter outputStream = new OutputStreamWriter(
-						new FileOutputStream(file,true),
-						"UTF-8");
-				outputStream.write(str);
-				outputStream.flush();
-				outputStream.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-	}
 	@Override
 	public void run() {
 		try {
@@ -72,39 +49,34 @@ public class SynDataRunnable extends BaseController  implements Runnable{
 				Map<String, Object> param=new HashMap<>();
 				param.put("tableName", tableName);
 				List<Map<String, Object>> list=mssqlService.getDataByTableName(param);
-				if (list!=null&&list.size()>0) {
-					@SuppressWarnings("unchecked")
-					List<SynDataBean> beans=(List<SynDataBean>) request.getAttribute("beans");
-					SynDataBean bean=null;
-					if(beans==null){
-						beans=new CopyOnWriteArrayList<>();
-						bean=new SynDataBean(tableName);
-						beans.add(bean);
-					}else{
-						for (int i = 0; i < beans.size(); i++) {
-							SynDataBean synDataBean=beans.get(i);
-							if(tableName.equals(synDataBean.getTableName())){
-								bean=synDataBean;
-								break;
-							}
-						}
-						if(bean==null){
-							bean=new SynDataBean(tableName);
-							beans.add(bean);
-						}
+				@SuppressWarnings("unchecked")
+				List<SynDataLogBean> beans=(List<SynDataLogBean>) request.getAttribute("beans");
+				SynDataLogBean bean=null;
+				for (int i = 0; i < beans.size(); i++) {
+					SynDataLogBean synDataBean=beans.get(i);
+					if(tableName.equals(synDataBean.getTableName())){
+						bean=synDataBean;
+						break;
 					}
-					List<Map<String, Object>> filedList=mssqlService.getTableStructure(tableName);
-					bean.setCountNum(list.size());
-					mysqlService.insertList(tableName,filedList,list,bean);
-					request.setAttribute("beans", beans);
+				}
+				if(bean==null){
+					bean=new SynDataLogBean(tableName);
+					beans.add(bean);
+				}
+				bean.setCountNum(list.size());
+				if (list!=null&&list.size()>0) {
+					bean=mysqlService.insertList(tableName,list,bean);
 					File file=new File(path+"log\\insert"+format.format(new Date())+".log");
 					try {
-						JSONArray jsons=JSONArray.fromObject(beans);
-						saveFile(file,jsons.toString());
+						JSONArray jsons=JSONArray.fromObject(beans.toString());
+						saveFile(file,jsons.toString()+"\r\n",false);
 					} catch (Exception e) {
 						System.out.println(beans);
 						e.printStackTrace();
 					}
+					request.setAttribute("beans", beans);
+				}else{
+					bean.setInsertNum(0);
 				}
 			}
 		} catch (Exception e) {
