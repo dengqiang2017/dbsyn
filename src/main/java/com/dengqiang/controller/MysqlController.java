@@ -169,7 +169,7 @@ public class MysqlController extends BaseController{
 		}
 		return new ResultInfo(success, msg);
 	}
-	
+
 	/**
 	 * 获取数据插入信息
 	 * @param request

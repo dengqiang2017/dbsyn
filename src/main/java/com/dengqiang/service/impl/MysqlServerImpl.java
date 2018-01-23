@@ -109,8 +109,7 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 		StringBuffer sql=new StringBuffer("insert into ");
 		sql.append(tableName).append("(");
 		StringBuffer vals=new StringBuffer(")VALUES(");
-		for (Iterator<Entry<String, Object>> iterator = set.iterator(); iterator.hasNext();) {
-			Entry<String, Object> entry =iterator.next();
+		for (Entry<String, Object> entry : set) {
 			Object value=entry.getValue();
 			if (value!=null) {
 				String key=entry.getKey();
@@ -176,7 +175,7 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 	public List<Map<String, Object>> getTableStructure(String tableName) {
 		
 		return mysqlDao.getTableStructure(tableName);
-	}	
+	}
 	
 	@Override
 	public String cleraData(String[] tableNames) {

@@ -95,11 +95,12 @@ public class Test {
 		json.put("SPMD5", "SPMD5");
 		json.put("SPWJSFCZ", false);
 		json.put("YPWJSFCZ", true);
-		json.put("SPWNSFRK", false);
-		json.put("YPWNSFRK", true);
+		json.put("SPWJSFRK", false);
+		json.put("YPWJSFRK", true);
 		json.put("BZ", "test_备注");
 //		test.postData(url, json);
 		try {
+			System.out.println(url+"?szInfo="+json.toString());
 			SendGet(url+"?szInfo="+URLEncoder.encode(json.toString(),"utf-8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

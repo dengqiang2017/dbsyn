@@ -159,7 +159,6 @@ $("#synData").click(function(){
 	},function(data){
 		pop_up_box.loadWaitClose();
 		if(data.success){
-//			pop_up_box.showMsg("创建成功!");
 			setTimeout(function(){
 				insertInfo=setInterval(function(){
 					refreshLog();
@@ -177,6 +176,7 @@ $("#findMysql").bind("input",function(){
 $("#stop").bind("input",function(){
 	clearInterval(insertInfo);
 });
+var jsonData;
 function refreshLog(){
 		$.get("mysql/getInsertInfo.do",function(data){
 		if(data&&data.length>0){
@@ -196,8 +196,12 @@ function refreshLog(){
 				item.find(".insertNum").html(json.insertNum);
 				item.find(".msg").html(json.msg);
 			}
-		}else{
+		}
+		var json=JSON.stringify(data);
+		if(json==jsonData){
 			clearInterval(insertInfo);
+		}else{
+			jsonData=json;
 		}
 		$("#count").html(data.length);
 		if (data.length==mysqlCount) {
@@ -206,32 +210,9 @@ function refreshLog(){
 	});
 }
 $("#refresh").click(function(){
-	$.get("log/insert2018-01-22.log",function(data){
-	if(data&&data.length>0){
-		$("#syndata").html("");
-		for (var i = 0; i < data.length; i++) {
-			var json=data[i];
-			if(json.insertNum==null&&!$("#insertNum").prop("checked")){
-				continue;
-			}
-			if(json.countNum==0&&!$("#countNum").prop("checked")){
-				continue;
-			}
-			var item=$(itemhtml);
-			$("#syndata").append(item);
-			item.find(".tableName").html(json.tableName);
-			item.find(".countNum").html(json.countNum);
-			item.find(".insertNum").html(json.insertNum);
-			item.find(".msg").html(json.msg);
-		}
-		}else{
-			clearInterval(insertInfo);
-		}
-		$("#count").html(data.length);
-		if (data.length==mysqlCount) {
-			clearInterval(insertInfo);
-		}
-	});
+	insertInfo=setInterval(function(){
+		refreshLog();
+	},500);
 });
 $("#mysqlCount").click(function(){
 	loadMysqlData();
