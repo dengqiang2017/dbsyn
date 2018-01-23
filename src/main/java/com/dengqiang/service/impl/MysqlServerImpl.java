@@ -49,12 +49,18 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 		if (list!=null&&list.size()>0) {
 			if (list.size()>500) {
 				int len=list.size()/500;
+				int len2=list.size()%500;
 				ExecutorService threadPool = Executors.newFixedThreadPool(len);
 				for (int i = 0; i < len; i++) {
 					// TODO 复制list中的数据到每个分别的线程中
 					Object[] obj= Arrays.copyOfRange(list.toArray(), i*500, (i+1)*500);
 					InsertRunnable insert=new InsertRunnable(obj, tableName, bean);
 					threadPool.execute(insert);
+				}
+				if (len2>0) {
+					Object[] obj= Arrays.copyOfRange(list.toArray(), len*500, list.size());
+					InsertRunnable insert=new InsertRunnable(obj, tableName, bean);
+					threadPool.execute(insert); 
 				}
 				threadPool.shutdown();
 			}else {
@@ -63,7 +69,6 @@ public class MysqlServerImpl extends BaseController implements IMysqlService {
 		}
 		return bean;
 	}
-	
 	class InsertRunnable implements Runnable{
 		private Object[] objs;
 		private String tableName;

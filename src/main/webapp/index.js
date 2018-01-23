@@ -196,20 +196,18 @@ function refreshLog(){
 				item.find(".insertNum").html(json.insertNum);
 				item.find(".msg").html(json.msg);
 			}
-		}
-		var json=JSON.stringify(data);
-		if(json==jsonData){
-			clearInterval(insertInfo);
-		}else{
-			jsonData=json;
+			var json=JSON.stringify(data);
+			if(json==jsonData){
+				clearInterval(insertInfo);
+			}else{
+				jsonData=json;
+			}
 		}
 		$("#count").html(data.length);
-		if (data.length==mysqlCount) {
-			clearInterval(insertInfo);
-		}
 	});
 }
 $("#refresh").click(function(){
+	clearInterval(insertInfo);
 	insertInfo=setInterval(function(){
 		refreshLog();
 	},500);
