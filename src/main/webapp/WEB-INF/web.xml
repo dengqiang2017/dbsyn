@@ -51,20 +51,12 @@
         </listener-class>  
     </listener>  
 <!-- end -->  
-  
-  <error-page>
-    <error-code>404</error-code>
-    <location>/phone/wrong.html</location>
-  </error-page>
-  <error-page>
-    <exception-type>java.lang.Exception</exception-type>
-    <location>/phone/wrong.jsp</location>
-  </error-page>
-  <welcome-file-list>
-    <welcome-file>index.jsp</welcome-file>
-  </welcome-file-list>
+   
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
 
 </web-app>

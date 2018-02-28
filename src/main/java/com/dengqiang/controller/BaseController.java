@@ -37,7 +37,7 @@ public abstract class BaseController {
 			}
 		}
 		return param;
-	} 
+	}
 
 	/** 
 	 * 获取绝对路径  已经在返回时添加 '/'

@@ -79,7 +79,7 @@ public class Test {
 //	}
 	
 	public static void main(String[] args) {
-		Test test=new Test();
+//		Test test=new Test();
 		String url="http://10.18.2.76:8015/SPDJ/PutMeetingInfoToDB";
 		JSONObject json=new JSONObject();
 		json.put("WJID", "test_123456");
@@ -118,8 +118,8 @@ public class Test {
         //string YPMD5;                                   //音频MD5码   没有就为空
         //bool SPWJSFCZ;                                  //视频文件是否入库
         //bool YPWJSFCZ;                                  //音频文件是否入库
-        //bool SPWNSFRK;                                  //视频文件是否入库
-        //bool YPWNSFRK;                                  //音频文件是否入库
+        //bool SPWNSFRK;                                  //音频文件是否入库
+        //bool YPWNSFRK;                                  //视频文件是否入库
         //string BZ;                                      //备注
 	}
 	public static String SendGet(String url) {

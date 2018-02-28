@@ -1,6 +1,5 @@
 package com.dengqiang.controller;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -148,9 +147,8 @@ public class MysqlController extends BaseController{
 				}
 				String[] tableNames=tableName.split(",");
 				ExecutorService threadPool = Executors.newFixedThreadPool(tableNames.length);
-		        //5个写线程 
 //				List<SynDataLogBean> beans=new ArrayList<>(tableNames.length);
-				List<SynDataLogBean> beans=new Vector<>(tableNames.length);
+				List<SynDataLogBean> beans=new Vector<>(tableNames.length);//带同步功能的list
 				request.getSession().setAttribute("beans", beans);
 		        for (int i = 0; i < tableNames.length; i++){
 		        	SynDataRunnable th=new SynDataRunnable(tableNames[i],getRealPath(request));
